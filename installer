@@ -39,5 +39,5 @@ opkg update
 opkg install socketman coova-chilli
 
 #Change chilli init
-curl -k -o /etc/init.d/chilli $(CHILLI_URL)
+curl -k -o /etc/init.d/chilli ${CHILLI_URL}
 /etc/init.d/chilli enable
