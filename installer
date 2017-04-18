@@ -1,0 +1,42 @@
+#!/bin/sh /etc/rc.common
+#Installer Script
+. /etc/openwrt_release
+
+BASE_URL=http://s3-eu-west-1.amazonaws.com/cucumber-feed
+ENVIRONMENT=beta
+DISTRIB_TARGET=$(echo $DISTRIB_TARGET | awk -F/ '{print $1}')
+PROJECT_NAME=$(echo $DISTRIB_ID | awk '{print tolower($0)}')
+BRANCH=$(echo $DISTRIB_RELEASE | awk '{print tolower($0)}')
+
+case "$BRANCH" in
+  "snapshot")
+    BRANCH="master";;
+  "17.01.0")
+    BRANCH="lede-17.01";;
+  "15.05.1")
+    BRANCH="chaos_calmer";;
+  esac
+
+if [ -z ${DISTRIB_ARCH+x} ]; then DISTRIB_ARCH=$DISTRIB_TARGET; fi
+
+FULL_URL=${BASE_URL}/${ENVIRONMENT}/${PROJECT_NAME}/${BRANCH}/${DISTRIB_ARCH}
+
+#Download and add CT key
+curl -k -o /tmp/key-build.pub ${FULL_URL}/cucumber/key-build.pub
+opkg-key add /tmp/key-build.pub
+
+#Add and install CT feeds
+#check if feeds includes
+if grep -q ${FULL_URL} "/etc/opkg/customfeeds.conf"; then
+  echo "Feed already found, not adding"
+else
+  echo src/gz cucumber-feed ${FULL_URL}/cucumber >> /etc/opkg/customfeeds.conf
+fi
+
+#Install Packages
+opkg update
+opkg install socketman coova-chilli
+
+#Change chilli init
+curl -k -o /etc/init.d/chilli ${BASE_URL}/installer/chilli
+/etc/init.d/chilli enable
