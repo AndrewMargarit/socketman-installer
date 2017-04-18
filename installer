@@ -17,6 +17,7 @@ case "$BRANCH" in
     BRANCH="chaos_calmer";;
   esac
 
+#DISTRIB_ARCH is not available in OpenWRT
 if [ -z ${DISTRIB_ARCH+x} ]; then DISTRIB_ARCH=$DISTRIB_TARGET; fi
 
 FULL_URL=${BASE_URL}/${ENVIRONMENT}/${PROJECT_NAME}/${BRANCH}/${DISTRIB_ARCH}
@@ -26,7 +27,6 @@ curl -k -o /tmp/key-build.pub ${FULL_URL}/cucumber/key-build.pub
 opkg-key add /tmp/key-build.pub
 
 #Add and install CT feeds
-#check if feeds includes
 if grep -q ${FULL_URL} "/etc/opkg/customfeeds.conf"; then
   echo "Feed already found, not adding"
 else
