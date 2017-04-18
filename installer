@@ -3,6 +3,7 @@
 . /etc/openwrt_release
 
 BASE_URL=http://s3-eu-west-1.amazonaws.com/cucumber-feed
+CHILLI_URL=https://raw.githubusercontent.com/AndrewMargarit/socketman-installer/master/files/openwrt/chilli
 ENVIRONMENT=beta
 DISTRIB_TARGET=$(echo $DISTRIB_TARGET | awk -F/ '{print $1}')
 PROJECT_NAME=$(echo $DISTRIB_ID | awk '{print tolower($0)}')
@@ -38,5 +39,5 @@ opkg update
 opkg install socketman coova-chilli
 
 #Change chilli init
-curl -k -o /etc/init.d/chilli ${BASE_URL}/installer/chilli
+curl -k -o /etc/init.d/chilli $(CHILLI_URL)
 /etc/init.d/chilli enable
