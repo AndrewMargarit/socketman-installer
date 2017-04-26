@@ -2,9 +2,9 @@
 #Installer Script
 . /etc/openwrt_release
 
-BASE_URL=http://s3-eu-west-1.amazonaws.com/cucumber-feed
+BASE_URL=http://packages.ctapp.io
 CHILLI_URL=https://raw.githubusercontent.com/AndrewMargarit/socketman-installer/master/files/openwrt/chilli
-ENVIRONMENT=beta
+ENVIRONMENT=$1
 DISTRIB_TARGET=$(echo $DISTRIB_TARGET | awk -F/ '{print $1}')
 PROJECT_NAME=$(echo $DISTRIB_ID | awk '{print tolower($0)}')
 BRANCH=$(echo $DISTRIB_RELEASE | awk '{print tolower($0)}')
@@ -14,9 +14,10 @@ case "$BRANCH" in
     BRANCH="master";;
   "17.01.0")
     BRANCH="lede-17.01";;
-  "15.05.1")
-    BRANCH="chaos_calmer";;
   esac
+
+#Set the default environment if no variable sent
+if [ -z ${ENVIRONMENT+x} ]; then ENVIRONMENT=beta; fi
 
 #DISTRIB_ARCH is not available in OpenWRT
 if [ -z ${DISTRIB_ARCH+x} ]; then DISTRIB_ARCH=$DISTRIB_TARGET; fi
@@ -24,14 +25,14 @@ if [ -z ${DISTRIB_ARCH+x} ]; then DISTRIB_ARCH=$DISTRIB_TARGET; fi
 FULL_URL=${BASE_URL}/${ENVIRONMENT}/${PROJECT_NAME}/${BRANCH}/${DISTRIB_ARCH}
 
 #Download and add CT key
-curl -k -o /tmp/key-build.pub ${FULL_URL}/cucumber/key-build.pub
+curl -k -o /tmp/key-build.pub ${FULL_URL}/ct/key-build.pub
 opkg-key add /tmp/key-build.pub
 
 #Add and install CT feeds
 if grep -q ${FULL_URL} "/etc/opkg/customfeeds.conf"; then
   echo "Feed already found, not adding"
 else
-  echo src/gz cucumber-feed ${FULL_URL}/cucumber >> /etc/opkg/customfeeds.conf
+  echo src/gz ct-feed ${FULL_URL}/ct >> /etc/opkg/customfeeds.conf
 fi
 
 #Install Packages
@@ -40,4 +41,3 @@ opkg install socketman coova-chilli
 
 #Change chilli init
 curl -k -o /etc/init.d/chilli ${CHILLI_URL}
-/etc/init.d/chilli enable
