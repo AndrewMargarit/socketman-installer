@@ -3,8 +3,7 @@
 . /etc/openwrt_release
 
 BASE_URL=http://packages.ctapp.io
-CHILLI_URL=https://raw.githubusercontent.com/AndrewMargarit/socketman-installer/master/files/openwrt/chilli
-ENVIRONMENT=$1
+CHILLI_URL=https://raw.githubusercontent.com/AndrewMargarit/socketman-installer/master/files/lede/chilli
 DISTRIB_TARGET=$(echo $DISTRIB_TARGET | awk -F/ '{print $1}')
 PROJECT_NAME=$(echo $DISTRIB_ID | awk '{print tolower($0)}')
 BRANCH=$(echo $DISTRIB_RELEASE | awk '{print tolower($0)}')
@@ -12,7 +11,7 @@ BRANCH=$(echo $DISTRIB_RELEASE | awk '{print tolower($0)}')
 case "$BRANCH" in
   "snapshot")
     BRANCH="master";;
-  "17.01.0")
+  "17.01"*)
     BRANCH="lede-17.01";;
   esac
 
@@ -41,3 +40,6 @@ opkg install socketman coova-chilli
 
 #Change chilli init
 curl -k -o /etc/init.d/chilli ${CHILLI_URL}
+
+echo "All Done"
+exit
