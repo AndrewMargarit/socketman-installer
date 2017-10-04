@@ -2,7 +2,7 @@
 #Installer Script
 . /etc/openwrt_release
 
-BASE_URL=http://packages.ctapp.io
+BASE_URL=http://packages.ctapp.io/packages
 CHILLI_URL=https://raw.githubusercontent.com/AndrewMargarit/socketman-installer/master/files/lede/chilli
 DISTRIB_TARGET=$(echo $DISTRIB_TARGET | awk -F/ '{print $1}')
 PROJECT_NAME=$(echo $DISTRIB_ID | awk '{print tolower($0)}')
