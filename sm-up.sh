@@ -1,0 +1,44 @@
+#!/bin/sh /etc/rc.common
+#Installer Script
+. /etc/openwrt_release
+
+BASE_URL=http://packages.ctapp.io/packages
+DISTRIB_TARGET=$(echo $DISTRIB_TARGET | awk -F/ '{print $1}')
+PROJECT_NAME=$(echo $DISTRIB_ID | awk '{print tolower($0)}')
+BRANCH=$(echo $DISTRIB_RELEASE | awk '{print tolower($0)}')
+
+case "$BRANCH" in
+  "snapshot")
+    BRANCH="master";;
+  "17.01"*)
+    BRANCH="lede-17.01";;
+  esac
+
+#Set the default environment if no variable sent
+if [ -z ${ENVIRONMENT+x} ]; then ENVIRONMENT=beta; fi
+
+#DISTRIB_ARCH is not available in OpenWRT
+if [ -z ${DISTRIB_ARCH+x} ]; then DISTRIB_ARCH=$DISTRIB_TARGET; fi
+
+FULL_URL=${BASE_URL}/${ENVIRONMENT}/${PROJECT_NAME}/${BRANCH}/${DISTRIB_ARCH}
+
+#Download and add CT key
+curl -k -o /tmp/key-build.pub ${FULL_URL}/ct/key-build.pub
+opkg-key add /tmp/key-build.pub
+
+#Add and install CT feeds
+if grep -q ${FULL_URL} "/etc/opkg/customfeeds.conf"; then
+  echo "Feed already found, not adding"
+else
+  echo src/gz ct-feed ${FULL_URL}/ct >> /etc/opkg/customfeeds.conf
+fi
+
+#Restart SM
+/etc/init.d/socketman restart
+
+#Install Packages
+opkg update
+opkg install socketman
+
+echo "All Done"
+exit
